@@ -3,6 +3,11 @@ package WordDocxScraper;
 use warnings;
 use strict;
 
+use Exporter 'import';
+our @EXPORT_OK = qw/read_doc/;
+use XML::LibXML;
+
+
 =head1 NAME
 
 WordDocxScraper - A quick and dirty Microsoft Word DocX document scraper
@@ -52,10 +57,6 @@ document info it has scraped.
 
 
 =cut
-
-use Exporter 'import';
-@EXPORT_OK = qw/read_doc/;
-use XML::LibXML;
 
 sub read_doc
 {
