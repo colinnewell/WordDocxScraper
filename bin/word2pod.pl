@@ -6,6 +6,11 @@ word2pod.pl - a quick and simple script to turn a docx to pod
 
 This script takes the xml from a Microsoft Office docx document and turns it into pod.
 
+Run this like,
+
+  unzip mydoc.docx
+  ./word2pod.pl word/document.xml word/_rels/document.xml.rels > my.pod
+
 Why you'd want to do this is anyones guess but we want to turn a single document
 into pod so I wrote this script.  It does a reasonable job on that one document
 so I figured I'd share it. 
@@ -33,15 +38,15 @@ See http://dev.perl.org/licenses/ for more information.
 =cut
 
 use strict;
-use XML::LibXML;
-use WordDocxScraper;
-use Data::Dumper;
 use feature "switch";
-use Text::Wrap;
 use List::Util qw/reduce/;
+use Text::Wrap;
+use WordDocxScraper;
+use XML::LibXML;
 
 binmode STDOUT, ":utf8";
 
+# FIXME: ought to add help on parameters etc.
 my $file = shift;
 my $rels = shift;
 my $dom = XML::LibXML->load_xml(location => $file);
