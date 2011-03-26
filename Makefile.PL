@@ -6,6 +6,7 @@ author   q{Colin Newell <colin.newell@gmail.com>};
 license  'perl';
 
 requires 'XML::LibXML';
+requires 'Text::Wrap';
 
 build_requires 'Test::More';
 
