@@ -1,5 +1,13 @@
 Revision history for WordDocxScraper
 
+0.02    28-March-2011
+        * Added a new script, unicode_punctuation.pl to display fancy punctuation like
+          smart quotes added by word.  Essentially just displaying unicode (not ascii) 
+          punctuation.
+        * Added a cleanup of punctuation on the code blocks to make them more copy
+          paste friendly.  Convert smart quotes to regular quotes when outputting pod
+          code sections.
+
 0.01    Date/time
         First version, released on an unsuspecting world.
 
