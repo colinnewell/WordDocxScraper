@@ -69,8 +69,8 @@ for my $para (@$doc)
         }
         when ('Code')
         {
-            print reduce { $a . $b } map { "  " . join ( '', @$_ ). "\n" } @{$para->{lines}};
-            print "\n";
+            my $paragraph = reduce { $a . $b } map { "  " . join ( '', @$_ ). "\n" } @{$para->{lines}};
+            print remove_smart_punctuation($paragraph) . "\n";
         }
         when ('Heading1')
         {
@@ -102,3 +102,16 @@ for my $para (@$doc)
 
 }
 
+sub remove_smart_punctuation
+{
+    my $fragment = shift;
+    # clean up the punctuation
+    # to be more regular ascii
+    $fragment =~ s/\N{U+2013}/-/g;
+    $fragment =~ s/\N{U+2018}/'/g;
+    $fragment =~ s/\N{U+2019}/'/g;
+    $fragment =~ s/\N{U+201c}/"/g;
+    $fragment =~ s/\N{U+201d}/"/g;
+    $fragment =~ s/\N{U+2026}/.../g;
+    return $fragment;
+}
