@@ -53,6 +53,22 @@ my $dom = XML::LibXML->load_xml(location => $file);
 my $relationships = XML::LibXML->load_xml(location => $rels);
 my $doc = WordDocxScraper::read_doc($dom, $relationships);
 
+# remove all 'smart' punctuation.
+for my $para (@$doc)
+{
+    for my $line (@{$para->{lines}})
+    {
+        for my $frag (@$line)
+        {
+            $frag =~ s/\N{U+2013}/-/g;
+            $frag =~ s/\N{U+2018}/'/g;
+            $frag =~ s/\N{U+2019}/'/g;
+            $frag =~ s/\N{U+201c}/"/g;
+            $frag =~ s/\N{U+201d}/"/g;
+            $frag =~ s/\N{U+2026}/.../g;
+        }
+    }
+}
 for my $para (@$doc)
 {
     for my $links (@{$para->{img}})
@@ -70,7 +86,7 @@ for my $para (@$doc)
         when ('Code')
         {
             my $paragraph = reduce { $a . $b } map { "  " . join ( '', @$_ ). "\n" } @{$para->{lines}};
-            print remove_smart_punctuation($paragraph) . "\n";
+            print $paragraph . "\n";
         }
         when ('Heading1')
         {
@@ -102,16 +118,3 @@ for my $para (@$doc)
 
 }
 
-sub remove_smart_punctuation
-{
-    my $fragment = shift;
-    # clean up the punctuation
-    # to be more regular ascii
-    $fragment =~ s/\N{U+2013}/-/g;
-    $fragment =~ s/\N{U+2018}/'/g;
-    $fragment =~ s/\N{U+2019}/'/g;
-    $fragment =~ s/\N{U+201c}/"/g;
-    $fragment =~ s/\N{U+201d}/"/g;
-    $fragment =~ s/\N{U+2026}/.../g;
-    return $fragment;
-}
