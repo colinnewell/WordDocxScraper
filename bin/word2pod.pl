@@ -53,6 +53,23 @@ my $dom = XML::LibXML->load_xml(location => $file);
 my $relationships = XML::LibXML->load_xml(location => $rels);
 my $doc = WordDocxScraper::read_doc($dom, $relationships);
 
+# remove all 'smart' punctuation.
+for my $para (@$doc)
+{
+    for my $line (@{$para->{lines}})
+    {
+        for my $bit (@$line)
+        {
+            my $frag = $bit->{text};
+            $frag =~ s/\N{U+2013}/-/g;
+            $frag =~ s/\N{U+2018}/'/g;
+            $frag =~ s/\N{U+2019}/'/g;
+            $frag =~ s/\N{U+201c}/"/g;
+            $frag =~ s/\N{U+201d}/"/g;
+            $frag =~ s/\N{U+2026}/.../g;
+        }
+    }
+}
 for my $para (@$doc)
 {
     for my $links (@{$para->{img}})
@@ -64,54 +81,58 @@ for my $para (@$doc)
         when ('Bullet')
         {
             print "=over\n\n";
-            print reduce { $a . $b } map { "\n=item * " . join ( '', @$_ ) ."\n" } @{$para->{lines}}; 
+            print reduce { $a . $b } map { "\n=item * " . join ( '', map { render_chunk ($_) } @$_ ) ."\n" } @{$para->{lines}}; 
             print "\n=back\n\n";
         }
         when ('Code')
         {
-            my $paragraph = reduce { $a . $b } map { "  " . join ( '', @$_ ). "\n" } @{$para->{lines}};
-            print remove_smart_punctuation($paragraph) . "\n";
+            my $paragraph = reduce { $a . $b } map { "  " . join ( '', map { render_chunk ($_) } @$_ ). "\n" } @{$para->{lines}};
+            print $paragraph . "\n";
         }
         when ('Heading1')
         {
-            print "=head1 " . join ("", @{$para->{lines}->[0]}) . "\n";
+            print "=head1 " . join ("", map { render_chunk ($_) } @{$para->{lines}->[0]}) . "\n";
             my @rest = splice @{$para->{lines}}, 1;
-            print reduce { $a . $b } map { "\n" . join ( '', @$_ ) } @rest;
+            print reduce { $a . $b } map { "\n" . join ( '', map { render_chunk ($_) } @$_ ) } @rest;
             print "\n";
         }
         when ('Heading2')
         {
-            print "=head2 " . join ("", @{$para->{lines}->[0]}) . "\n";
+            print "=head2 " . join ("", map { render_chunk ($_) } @{$para->{lines}->[0]}) . "\n";
             my @rest = splice @{$para->{lines}}, 1;
-            print reduce { $a . $b } map { "\n" . join ( '', @$_ ) } @rest;
+            print reduce { $a . $b } map { "\n" . join ( '', map { render_chunk ($_) } @$_ ) } @rest;
             print "\n";
         }
         when ('Heading3')
         {
             print "=head3 " . join ("", @{$para->{lines}->[0]}) . "\n";
             my @rest = splice @{$para->{lines}}, 1;
-            print reduce { $a . $b } map { "\n" . join ( '', @$_ ) } @rest;
+            print reduce { $a . $b } map { "\n" . join ( '', map { render_chunk ($_) } @$_ ) } @rest;
             print "\n";
         }
         when ('normal')
         {
-            print wrap ('', '', reduce { $a . $b } map { join ( '', @$_ ). "\n" } @{$para->{lines}});
+            print wrap ('', '', reduce { $a . $b } map { join ( '', map { render_chunk ($_) } @$_ ). "\n" } @{$para->{lines}});
             print "\n";
         }
     }
 
 }
 
-sub remove_smart_punctuation
+sub render_chunk
 {
-    my $fragment = shift;
-    # clean up the punctuation
-    # to be more regular ascii
-    $fragment =~ s/\N{U+2013}/-/g;
-    $fragment =~ s/\N{U+2018}/'/g;
-    $fragment =~ s/\N{U+2019}/'/g;
-    $fragment =~ s/\N{U+201c}/"/g;
-    $fragment =~ s/\N{U+201d}/"/g;
-    $fragment =~ s/\N{U+2026}/.../g;
-    return $fragment;
+    my $bit = shift;
+    return if !$bit;
+    if($bit->{style} eq 'bold')
+    {
+        return 'B<' . $bit->{text} . '>';
+    }
+    elsif($bit->{style} eq 'italic')
+    {
+        return 'I<' . $bit->{text} . '>';
+    }
+    else
+    {
+        return $bit->{text};
+    }
 }
