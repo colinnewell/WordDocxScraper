@@ -55,8 +55,9 @@ for my $para (@$doc)
 {
     for my $line (@{$para->{lines}})
     {
-        for my $frag (@$line)
+        for my $bit (@$line)
         {
+            my $frag = $bit->{text};
             while($frag =~ /(\p{P})/g)
             {
                 my $ord = ord($1);

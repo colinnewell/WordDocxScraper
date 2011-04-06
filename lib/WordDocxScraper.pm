@@ -115,13 +115,19 @@ sub read_doc
             }
         }
 
-        my @nodes = $xc->findnodes('*/w:t', $p);
-        my @text = map { $_->textContent } @nodes;
+        my @bits = $xc->findnodes('w:r', $p);
         my @line;
-        for my $t (@text)
+        for my $b (@bits)
         {
-            # FIXME: get extra info like italic.
-            push @line, $t;
+            my $s = 'normal';
+            $s = 'bold' if $xc->findnodes('w:rPr/w:b', $b);
+            $s = 'italic' if $xc->findnodes('w:rPr/w:i', $b);
+            my @nodes = $xc->findnodes('w:t', $b);
+            my @text = map { $_->textContent } @nodes;
+            for my $t (@text)
+            {
+                push @line, { style => $s, text => $t };
+            }
         }
         push @{$current_paragraph->{lines}}, \@line;
     }
