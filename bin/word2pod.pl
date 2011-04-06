@@ -67,6 +67,7 @@ for my $para (@$doc)
             $frag =~ s/\N{U+201c}/"/g;
             $frag =~ s/\N{U+201d}/"/g;
             $frag =~ s/\N{U+2026}/.../g;
+            $bit->{text} = $frag;
         }
     }
 }
