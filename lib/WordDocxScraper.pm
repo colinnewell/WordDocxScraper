@@ -94,7 +94,7 @@ sub read_doc
     my $current_paragraph = {};
     for my $p (@paragraphs)
     {
-        my $style = get_style($xc, $p);
+        my $style = _get_style($xc, $p);
         my $page_break = $xc->findnodes('w:r/w:br[@w:type="page"]', $p) ? 1 : 0;
         if(!defined $current_paragraph->{style} || $style ne $current_paragraph->{style})
         {
@@ -138,7 +138,7 @@ sub read_doc
     return \@doc;
 }
 
-sub get_style
+sub _get_style
 {
     my ($xc, $p) = @_;
 
