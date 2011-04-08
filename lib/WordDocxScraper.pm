@@ -95,11 +95,12 @@ sub read_doc
     for my $p (@paragraphs)
     {
         my $style = get_style($xc, $p);
+        my $page_break = $xc->findnodes('w:r/w:br[@w:type="page"]', $p) ? 1 : 0;
         if(!defined $current_paragraph->{style} || $style ne $current_paragraph->{style})
         {
             push @doc, $current_paragraph if(defined $current_paragraph->{style});
 
-            $current_paragraph = { style => $style, lines => [] };
+            $current_paragraph = { style => $style, lines => [], page_break => $page_break };
         }
         my @pictures = $xc->findnodes('*/w:drawing', $p);
         for my $img (@pictures)
@@ -115,17 +116,19 @@ sub read_doc
             }
         }
 
-        my @bits = $xc->findnodes('w:r', $p);
+        my @bits = $xc->findnodes('descendant::w:r', $p);
         my @line;
         for my $b (@bits)
         {
             my $s = 'normal';
             $s = 'bold' if $xc->findnodes('w:rPr/w:b', $b);
             $s = 'italic' if $xc->findnodes('w:rPr/w:i', $b);
+            $s = 'link' if $b->parentNode->tagName eq 'w:hyperlink';
             my @nodes = $xc->findnodes('w:t', $b);
             my @text = map { $_->textContent } @nodes;
             for my $t (@text)
             {
+                $DB::single = 1 if $t eq 'http://search.cpan.org';
                 push @line, { style => $s, text => $t };
             }
         }

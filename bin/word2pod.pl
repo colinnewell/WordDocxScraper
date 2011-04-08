@@ -75,7 +75,19 @@ for my $para (@$doc)
 {
     for my $links (@{$para->{img}})
     {
-        print "L<$links>\n\n";
+        if($links =~ /\.(png|jpe?g|gif)/i)
+        {
+            print "O<$links>\n\n";
+        }
+        else
+        {
+            print "L<$links>\n\n";
+        }
+    }
+    if($para->{page_break})
+    {
+        # pod2pdf extension
+        print "=ff\n";
     }
     given($para->{style})
     {
@@ -131,6 +143,10 @@ sub render_chunk
     elsif($bit->{style} eq 'italic')
     {
         return 'I<' . $bit->{text} . '>';
+    }
+    elsif($bit->{style} eq 'link')
+    {
+        return 'L<' . $bit->{text} . '>';
     }
     else
     {
